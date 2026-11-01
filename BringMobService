@@ -1,0 +1,131 @@
+-- [[ PARTE 1: CONFIGURAÇÕES E TABELA DE ALVOS ]] --
+_G.Seriality = true
+local TweenSpeed = 499
+
+-- Tabela de NPCs cadastrados por Sea e Ilha para o motor rastrear
+local BringNpcs = {
+    ["Sea 1"] = {
+        ["Starter Island"] = {"Bandit"},
+        ["Jungle"] = {"Monkey", "Gorilla", "King Gorilla"},
+        ["Pirate Village"] = {"Pirate", "Brute", "Bobby"},
+        ["Desert"] = {"Desert Bandit", "Desert Officer"},
+        ["Middle Island"] = {"The Saw"},
+        ["Frozen Village"] = {"Snow Bandit", "Snowman", "Yeti"},
+        ["Marine Fortress"] = {"Marine Subordinate", "Marine Captain", "Vice Admiral"},
+        ["Skylands Normal"] = {"Sky Bandit", "Dark Master"},
+        ["Upper Skylands"] = {"Skypiean Warrior", "Shanda"},
+        ["Skylands 3"] = {"Royal Squad", "Royal Soldier", "Thunder God"},
+        ["Prison"] = {"Prisoner", "Dangerous Prisoner", "Warden", "Chief", "Swan"},
+        ["Magma Village"] = {"Military Soldier", "Military Spy", "Magma Admiral"},
+        ["Underwater City"] = {"Fishman Warrior", "Fishman Commando", "Fishman Lord"},
+        ["Fountain City"] = {"Galley Pirate", "Galley Captain", "Cyborg"}
+    },
+    ["Sea 2"] = {
+        ["Kingdom of Rose"] = {"Raider", "Vassal", "Diamond"},
+        ["Cafe / Mansion"] = {"Jeremy", "Fajita"},
+        ["Green Zone"] = {"Marine Lieutenant", "Marine Captain", "Fajita"},
+        ["Graveyard"] = {"Zombie", "Vampire"},
+        ["Snow Mountain"] = {"Snow Trooper", "Winter Warrior"},
+        ["Hot and Cold"] = {"Lab Subordinate", "Horned Warrior", "Smoke Admiral"},
+        ["Cursed Ship"] = {"Ship Deckhand", "Ship Engineer", "Ship Steward", "Ship Officer", "Overseer"},
+        ["Ice Castle"] = {"Arctic Warrior", "Snow Lurker", "Awakened Ice Admiral"},
+        ["Forgotten Island"] = {"Sea Soldier", "Water Warrior", "Tide Keeper"}
+    },
+    ["Sea 3"] = {
+        ["Port Town"] = {"Pirate Millionaire", "Pistol Billionaire", "Stone"},
+        ["Hydra Island"] = {"Dragon Crew Warrior", "Dragon Crew Archer", "Female Island Assassin", "Beautiful Pirate"},
+        ["Great Tree"] = {"Marine Commodore", "Marine Rear Admiral", "Kilogram Admiral"},
+        ["Floating Turtle"] = {"Fishman Raider", "Fishman Captain", "Forest Elf", "Mythological Pirate", "Captain Elephant", "Beautiful Pirate"},
+        ["Haunted Castle"] = {"Reborn Skeleton", "Living Zombie", "Demonic Soul", "Possessed Mummy", "Soul Reaper"},
+        ["Sea Of Treats"] = {"Cookie Crafter", "Cake Guard", "Baking Staff", "Head Baker", "Cake Queen"}
+    }
+}
+
+-- Serviços e Variáveis Principais
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local plr = Players.LocalPlayer
+
+-- [[ PARTE 2: IDENTIFICAÇÃO DE MAPA E ANCORAGEM DE NPCS ]] --
+
+-- Identifica o Sea que você está jogando atualmente
+local function getCurrentSea()
+    local placeId = game.PlaceId
+    if placeId == 2758397124 then return "Sea 1"
+    elseif placeId == 4442272125 then return "Sea 2"
+    elseif placeId == 7405815058 then return "Sea 3" end
+    return "Sea 1"
+end
+
+-- Busca de forma inteligente um NPC vivo para servir de âncora para o Bring
+local function GetAnchorNPC(targetNpcs)
+    local enemies = game:GetService("Workspace").Enemies:GetChildren()
+    for _, enemy in pairs(enemies) do
+        local isTarget = false
+        
+        -- Verifica se esse NPC específico pertence às ilhas listadas
+        for island, npcList in pairs(targetNpcs) do
+            if table.find(npcList, enemy.Name) then
+                isTarget = true
+                break
+            end
+        end
+        
+        -- Se encontrar um vivo com as partes necessárias estruturadas, ele vira a âncora
+        if isTarget and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            return enemy.HumanoidRootPart
+        end
+    end
+    return nil
+end
+
+-- [[ PARTE 3: MOTOR DE TWEEN AGRESSIVO ENTRE NPCS E EXECUÇÃO ]] --
+
+-- // MOTOR DE BRING FOCADO NO NPC ALVO VIA TWEEN 499 // --
+local function StartNPCFocusedBring()
+    local currentSea = getCurrentSea()
+    local targetNpcs = BringNpcs[currentSea]
+    
+    game:GetService("RunService").Heartbeat:Connect(function()
+        if not _G.Seriality then return end
+        
+        -- Encontra qual NPC vai servir de base para puxar os outros
+        local anchorPart = GetAnchorNPC(targetNpcs)
+        if not anchorPart then return end
+        
+        -- Percorre todos os inimigos da workspace para dar o bring até a âncora
+        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+            local isTarget = false
+            
+            for island, npcList in pairs(targetNpcs) do
+                if table.find(npcList, enemy.Name) then
+                    isTarget = true
+                    break
+                end
+            end
+            
+            -- Se for um NPC válido e diferente da própria âncora, ele é movido por Tween/CFrame rápido
+            if isTarget and enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and enemy.HumanoidRootPart ~= anchorPart then
+                
+                -- Remove a colisão de todas as partes para que fiquem um dentro do outro sem bugar a física
+                for _, part in pairs(enemy:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+                
+                -- Aplica o cálculo do CFrame empilhando todos exatamente em cima do NPC âncora selecionado
+                enemy.HumanoidRootPart.CFrame = anchorPart.CFrame
+                
+                -- Zera as velocidades físicas para que nenhum mob saia voando ou seja arremessado da ilha
+                enemy.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                enemy.HumanoidRootPart.RotVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end)
+end
+
+-- [[ INICIALIZAÇÃO DO MOTOR ]] --
+-- Ativa o sistema focado em NPCs mantendo seu player totalmente seguro e livre de arremessos
+task.spawn(StartNPCFocusedBring)
