@@ -1,0 +1,1033 @@
+-- Serviços necessários
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local TeleportService = game:GetService("TeleportService")
+local Debris = game:GetService("Debris")
+local Clipboard = setclipboard or toclipboard or function() end
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Remove versões anteriores para evitar duplicatas
+if playerGui:FindFirstChild("NatAovHubGui") then
+    playerGui.NatAovHubGui:Destroy()
+end
+
+local KEY_CORRETA = "FreeKaitun2026"
+local linkGetKeys = "https://linkvertise.com/9148130/OFbvGgFnCDWn" -- Link ilustrativo para o Get Key
+
+-- ==========================================
+-- SISTEMA ANTI-IDLE E AUTO-RECONEXÃO SEGURO
+-- ==========================================
+task.spawn(function()
+    while true do
+        task.wait(300)
+        pcall(function()
+            local vu = game:GetService("VirtualUser")
+            vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            task.wait(1)
+            vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        end)
+    end
+end)
+
+task.spawn(function()
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
+    end
+    task.wait(10)
+
+    while true do
+        task.wait(15)
+        pcall(function()
+            local errorPrompt = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui", true)
+            if errorPrompt then
+                errorPrompt.Visible = true
+                TeleportService:Teleport(game.PlaceId, player)
+            end
+        end)
+    end
+end)
+
+-- ==========================================
+-- TELA PRINCIPAL E GUI DE CHAVE (KEY SYSTEM)
+-- ==========================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NatAovHubGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- ==========================================
+-- TELA DE KEY (EXATAMENTE COMO NA FOTO)
+-- ==========================================
+local keyFrame = Instance.new("Frame")
+keyFrame.Name = "KeyFrame"
+keyFrame.Size = UDim2.new(0, 360, 0, 190)
+keyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+keyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+keyFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 27)
+keyFrame.BorderSizePixel = 0
+keyFrame.Parent = screenGui
+
+local keyCorner = Instance.new("UICorner")
+keyCorner.CornerRadius = UDim.new(0, 8)
+keyCorner.Parent = keyFrame
+
+local keyStroke = Instance.new("UIStroke")
+keyStroke.Color = Color3.fromRGB(45, 50, 65)
+keyStroke.Thickness = 1
+keyStroke.Parent = keyFrame
+
+-- Topbar da Key
+local keyTopBar = Instance.new("Frame")
+keyTopBar.Size = UDim2.new(1, 0, 0, 32)
+keyTopBar.BackgroundTransparency = 1
+keyTopBar.Parent = keyFrame
+
+-- Bolinhas de estilo Mac (vermelha, amarela, cinza)
+local function createDot(posX, color)
+    local dot = Instance.new("Frame")
+    dot.Size = UDim2.new(0, 10, 0, 10)
+    dot.Position = UDim2.new(0, posX, 0.5, -5)
+    dot.BackgroundColor3 = color
+    dot.BorderSizePixel = 0
+    dot.Parent = keyTopBar
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = dot
+end
+createDot(12, Color3.fromRGB(255, 95, 85))
+createDot(28, Color3.fromRGB(255, 189, 46))
+createDot(44, Color3.fromRGB(39, 201, 63))
+
+local keyTitle = Instance.new("TextLabel")
+keyTitle.Size = UDim2.new(1, 0, 1, 0)
+keyTitle.BackgroundTransparency = 1
+keyTitle.Text = "MheeHub Key"
+keyTitle.TextColor3 = Color3.fromRGB(180, 185, 200)
+keyTitle.TextSize = 12
+keyTitle.Font = Enum.Font.GothamBold
+keyTitle.Parent = keyTopBar
+
+-- Título interno "Enter your access key"
+local enterKeyLbl = Instance.new("TextLabel")
+enterKeyLbl.Size = UDim2.new(1, -30, 0, 20)
+enterKeyLbl.Position = UDim2.new(0, 16, 0, 42)
+enterKeyLbl.BackgroundTransparency = 1
+enterKeyLbl.Text = "Enter your access key"
+enterKeyLbl.TextColor3 = Color3.fromRGB(230, 235, 245)
+enterKeyLbl.TextSize = 13
+enterKeyLbl.Font = Enum.Font.GothamBold
+enterKeyLbl.TextXAlignment = Enum.TextXAlignment.Left
+enterKeyLbl.Parent = keyFrame
+
+-- Caixa de texto "Paste key here"
+local keyTextBox = Instance.new("TextBox")
+keyTextBox.Size = UDim2.new(1, -32, 0, 36)
+keyTextBox.Position = UDim2.new(0, 16, 0, 72)
+keyTextBox.BackgroundColor3 = Color3.fromRGB(28, 32, 40)
+keyTextBox.BorderSizePixel = 0
+keyTextBox.PlaceholderText = "Paste key here"
+keyTextBox.PlaceholderColor3 = Color3.fromRGB(100, 110, 125)
+keyTextBox.Text = ""
+keyTextBox.TextColor3 = Color3.fromRGB(240, 245, 255)
+keyTextBox.TextSize = 12
+keyTextBox.Font = Enum.Font.GothamMedium
+keyTextBox.ClearTextOnFocus = false
+keyTextBox.Parent = keyFrame
+
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 6)
+boxCorner.Parent = keyTextBox
+
+-- Botão Submit (Laranja)
+local submitBtn = Instance.new("TextButton")
+submitBtn.Size = UDim2.new(0, 158, 0, 35)
+submitBtn.Position = UDim2.new(0, 16, 0, 122)
+submitBtn.BackgroundColor3 = Color3.fromRGB(235, 115, 50)
+submitBtn.BorderSizePixel = 0
+submitBtn.Text = "Submit"
+submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitBtn.TextSize = 12
+submitBtn.Font = Enum.Font.GothamBold
+submitBtn.Parent = keyFrame
+
+local submitCorner = Instance.new("UICorner")
+submitCorner.CornerRadius = UDim.new(0, 6)
+submitCorner.Parent = submitBtn
+
+-- Botão Get Key (Cinza Escuro)
+local getKeyBtn = Instance.new("TextButton")
+getKeyBtn.Size = UDim2.new(0, 158, 0, 35)
+getKeyBtn.Position = UDim2.new(1, -174, 0, 122)
+getKeyBtn.BackgroundColor3 = Color3.fromRGB(35, 40, 50)
+getKeyBtn.BorderSizePixel = 0
+getKeyBtn.Text = "Get Key"
+getKeyBtn.TextColor3 = Color3.fromRGB(210, 215, 225)
+getKeyBtn.TextSize = 12
+getKeyBtn.Font = Enum.Font.GothamBold
+getKeyBtn.Parent = keyFrame
+
+local getCorner = Instance.new("UICorner")
+getCorner.CornerRadius = UDim.new(0, 6)
+getCorner.Parent = getKeyBtn
+
+-- Texto inferior "Get-key link copied"
+local copiedNotice = Instance.new("TextLabel")
+copiedNotice.Size = UDim2.new(1, -30, 0, 16)
+copiedNotice.Position = UDim2.new(0, 16, 0, 164)
+copiedNotice.BackgroundTransparency = 1
+copiedNotice.Text = "Get-key link copied"
+copiedNotice.TextColor3 = Color3.fromRGB(80, 200, 100)
+copiedNotice.TextSize = 10
+copiedNotice.Font = Enum.Font.GothamMedium
+copiedNotice.TextXAlignment = Enum.TextXAlignment.Left
+copiedNotice.Visible = false
+copiedNotice.Parent = keyFrame
+
+-- ==========================================
+-- PAINEL PRINCIPAL DO HUB (INICIALMENTE INVISÍVEL)
+-- ==========================================
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 460, 0, 330)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 8)
+mainCorner.Parent = mainFrame
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(35, 40, 50)
+mainStroke.Thickness = 1
+mainStroke.Parent = mainFrame
+
+-- ==========================================
+-- SISTEMA DE NOTIFICAÇÃO CUSTOMIZADA E SOM
+-- ==========================================
+local notificationFrame = Instance.new("Frame")
+notificationFrame.Size = UDim2.new(0, 220, 0, 38)
+notificationFrame.Position = UDim2.new(1, 240, 0, 10)
+notificationFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 38)
+notificationFrame.BorderSizePixel = 0
+notificationFrame.ZIndex = 10
+notificationFrame.Parent = mainFrame
+
+local notifCorner = Instance.new("UICorner")
+notifCorner.CornerRadius = UDim.new(0, 6)
+notifCorner.Parent = notificationFrame
+
+local notifStroke = Instance.new("UIStroke")
+notifStroke.Color = Color3.fromRGB(50, 60, 80)
+notifStroke.Thickness = 1
+notifStroke.Parent = notificationFrame
+
+local notifText = Instance.new("TextLabel")
+notifText.Size = UDim2.new(1, -16, 1, 0)
+notifText.Position = UDim2.new(0, 8, 0, 0)
+notifText.BackgroundTransparency = 1
+notifText.Text = "Notificação"
+notifText.TextColor3 = Color3.fromRGB(240, 245, 255)
+notifText.TextSize = 11
+notifText.Font = Enum.Font.GothamBold
+notifText.ZIndex = 11
+notifText.TextXAlignment = Enum.TextXAlignment.Left
+notifText.Parent = notificationFrame
+
+local function mostrarNotificacao(mensagem, corBorda)
+    notifText.Text = mensagem
+    notifStroke.Color = corBorda or Color3.fromRGB(50, 140, 255)
+    
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://90225349029599"
+    sound.Volume = 1
+    sound.Parent = SoundService
+    sound:Play()
+    
+    Debris:AddItem(sound, 3)
+    
+    notificationFrame.Position = UDim2.new(1, 240, 0, 10)
+    TweenService:Create(notificationFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(1, -230, 0, 10)
+    }):Play()
+    
+    task.delay(2.2, function()
+        TweenService:Create(notificationFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 240, 0, 10)
+        }):Play()
+    end)
+end
+
+-- ==========================================
+-- AÇÃO DOS BOTÕES DA KEY SYSTEM
+-- ==========================================
+getKeyBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        Clipboard(linkGetKeys)
+    end)
+    copiedNotice.Visible = true
+    task.delay(2, function()
+        copiedNotice.Visible = false
+    end)
+end)
+
+submitBtn.MouseButton1Click:Connect(function()
+    if keyTextBox.Text == KEY_CORRETA then
+        -- Animação de fechamento da Key
+        TweenService:Create(keyFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 0, 0, 0),
+            BackgroundTransparency = 1
+        }):Play()
+        task.wait(0.3)
+        keyFrame:Destroy()
+
+        -- Abre o Hub Principal com animação
+        mainFrame.Visible = true
+        mainFrame.Size = UDim2.new(0, 0, 0, 0)
+        mainFrame.BackgroundTransparency = 1
+        TweenService:Create(mainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 460, 0, 330),
+            BackgroundTransparency = 0
+        }):Play()
+        mostrarNotificacao("Key Aprovada com Sucesso!", Color3.fromRGB(80, 220, 100))
+    else
+        mostrarNotificacao("Chave Incorreta!", Color3.fromRGB(240, 80, 80))
+    end
+end)
+
+-- ==========================================
+-- BARRA SUPERIOR (TOPBAR DO HUB)
+-- ==========================================
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 38)
+topBar.BackgroundTransparency = 1
+topBar.Parent = mainFrame
+
+local profileIcon = Instance.new("Frame")
+profileIcon.Size = UDim2.new(0, 22, 0, 22)
+profileIcon.Position = UDim2.new(0, 10, 0.5, -11)
+profileIcon.BackgroundColor3 = Color3.fromRGB(40, 90, 200)
+profileIcon.BorderSizePixel = 0
+profileIcon.Parent = topBar
+
+local profileCorner = Instance.new("UICorner")
+profileCorner.CornerRadius = UDim.new(1, 0)
+profileCorner.Parent = profileIcon
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0, 200, 0, 16)
+titleLabel.Position = UDim2.new(0, 40, 0, 5)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = player.Name
+titleLabel.TextColor3 = Color3.fromRGB(240, 245, 255)
+titleLabel.TextSize = 13
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = topBar
+
+local subTitleLabel = Instance.new("TextLabel")
+subTitleLabel.Size = UDim2.new(0, 130, 0, 12)
+subTitleLabel.Position = UDim2.new(0, 40, 0, 20)
+subTitleLabel.BackgroundTransparency = 1
+subTitleLabel.Text = "Blox Fruits"
+subTitleLabel.TextColor3 = Color3.fromRGB(130, 140, 155)
+subTitleLabel.TextSize = 9
+subTitleLabel.Font = Enum.Font.GothamMedium
+subTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+subTitleLabel.Parent = topBar
+
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 26, 0, 26)
+closeButton.Position = UDim2.new(1, -30, 0.5, -13)
+closeButton.BackgroundTransparency = 1
+closeButton.Text = "×"
+closeButton.TextColor3 = Color3.fromRGB(150, 160, 175)
+closeButton.TextSize = 18
+closeButton.Font = Enum.Font.GothamBold
+closeButton.Parent = topBar
+
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0, 26, 0, 26)
+minimizeButton.Position = UDim2.new(1, -56, 0.5, -13)
+minimizeButton.BackgroundTransparency = 1
+minimizeButton.Text = "🗕"
+minimizeButton.TextColor3 = Color3.fromRGB(150, 160, 175)
+minimizeButton.TextSize = 12
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.Parent = topBar
+
+-- ==========================================
+-- MENU LATERAL ESQUERDO (ABAS)
+-- ==========================================
+local sidebar = Instance.new("Frame")
+sidebar.Size = UDim2.new(0, 135, 1, -38)
+sidebar.Position = UDim2.new(0, 0, 0, 38)
+sidebar.BackgroundColor3 = Color3.fromRGB(14, 16, 20)
+sidebar.BorderSizePixel = 0
+sidebar.Parent = mainFrame
+
+local function createSidebarBtn(name, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -12, 0, 32)
+    btn.Position = UDim2.new(0, 6, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+    btn.BorderSizePixel = 0
+    btn.Text = "  " .. name
+    btn.TextColor3 = Color3.fromRGB(200, 205, 215)
+    btn.TextSize = 11
+    btn.Font = Enum.Font.GothamBold
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.Parent = sidebar
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+    
+    return btn
+end
+
+local tabKaitun = createSidebarBtn("Kaitun", 10)
+local tabConfigs = createSidebarBtn("Configs", 48)
+
+local activeIndicator = Instance.new("Frame")
+activeIndicator.Size = UDim2.new(0, 3, 0, 18)
+activeIndicator.Position = UDim2.new(0, 0, 0.5, -9)
+activeIndicator.BackgroundColor3 = Color3.fromRGB(50, 110, 240)
+activeIndicator.BorderSizePixel = 0
+activeIndicator.Parent = tabKaitun
+
+-- ==========================================
+-- PAINÉIS DE CONTEÚDO (DIREITA)
+-- ==========================================
+local containerKaitun = Instance.new("ScrollingFrame")
+containerKaitun.Size = UDim2.new(1, -145, 1, -45)
+containerKaitun.Position = UDim2.new(0, 140, 0, 40)
+containerKaitun.BackgroundTransparency = 1
+containerKaitun.BorderSizePixel = 0
+containerKaitun.ScrollBarThickness = 2
+containerKaitun.CanvasSize = UDim2.new(0, 0, 0, 320)
+containerKaitun.Visible = true
+containerKaitun.Parent = mainFrame
+
+local containerConfigs = Instance.new("ScrollingFrame")
+containerConfigs.Size = UDim2.new(1, -145, 1, -45)
+containerConfigs.Position = UDim2.new(0, 140, 0, 40)
+containerConfigs.BackgroundTransparency = 1
+containerConfigs.BorderSizePixel = 0
+containerConfigs.ScrollBarThickness = 2
+containerConfigs.CanvasSize = UDim2.new(0, 0, 0, 340)
+containerConfigs.Visible = false
+containerConfigs.Parent = mainFrame
+
+-- ==========================================
+-- BARRA DE PESQUISA ("Pesquisar Funções")
+-- ==========================================
+local function criarBarraPesquisa(parentContainer, onSearchCallback)
+    local searchBox = Instance.new("TextBox")
+    searchBox.Size = UDim2.new(1, -15, 0, 28)
+    searchBox.Position = UDim2.new(0, 5, 0, 5)
+    searchBox.BackgroundColor3 = Color3.fromRGB(30, 34, 42)
+    searchBox.BorderSizePixel = 0
+    searchBox.PlaceholderText = "Pesquisar Funções"
+    searchBox.PlaceholderColor3 = Color3.fromRGB(110, 120, 135)
+    searchBox.Text = ""
+    searchBox.TextColor3 = Color3.fromRGB(220, 225, 235)
+    searchBox.TextSize = 11
+    searchBox.Font = Enum.Font.GothamMedium
+    searchBox.ClearTextOnFocus = false
+    searchBox.Parent = parentContainer
+
+    local searchCorner = Instance.new("UICorner")
+    searchCorner.CornerRadius = UDim.new(1, 0)
+    searchCorner.Parent = searchBox
+
+    searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        onSearchCallback(searchBox.Text:lower())
+    end)
+end
+
+-- ==========================================
+-- ABA CONFIGS
+-- ==========================================
+criarBarraPesquisa(containerConfigs, function(txt) end)
+
+local function createCategoryLabel(text, posY, parentFrame)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -15, 0, 18)
+    lbl.Position = UDim2.new(0, 5, 0, posY)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(120, 130, 145)
+    lbl.TextSize = 10
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = parentFrame
+    return lbl
+end
+
+createCategoryLabel("Farm Config", 40, containerConfigs)
+
+local bringMobBox = Instance.new("Frame")
+bringMobBox.Size = UDim2.new(1, -15, 0, 34)
+bringMobBox.Position = UDim2.new(0, 5, 0, 60)
+bringMobBox.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+bringMobBox.BorderSizePixel = 0
+bringMobBox.Parent = containerConfigs
+
+local bringMobCorner = Instance.new("UICorner")
+bringMobCorner.CornerRadius = UDim.new(0, 6)
+bringMobCorner.Parent = bringMobBox
+
+local bringMobText = Instance.new("TextLabel")
+bringMobText.Size = UDim2.new(1, -15, 1, 0)
+bringMobText.Position = UDim2.new(0, 10, 0, 0)
+bringMobText.BackgroundTransparency = 1
+bringMobText.Text = "Bring Mob (Active)"
+bringMobText.TextColor3 = Color3.fromRGB(220, 225, 235)
+bringMobText.TextSize = 11
+bringMobText.Font = Enum.Font.GothamBold
+bringMobText.TextXAlignment = Enum.TextXAlignment.Left
+bringMobText.Parent = bringMobBox
+
+createCategoryLabel("Level PanicMode", 105, containerConfigs)
+
+local panicModeHolder = Instance.new("Frame")
+panicModeHolder.Size = UDim2.new(1, -15, 0, 180)
+panicModeHolder.Position = UDim2.new(0, 5, 0, 125)
+panicModeHolder.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+panicModeHolder.BorderSizePixel = 0
+panicModeHolder.Parent = containerConfigs
+
+local panicCorner = Instance.new("UICorner")
+panicCorner.CornerRadius = UDim.new(0, 6)
+panicCorner.Parent = panicModeHolder
+
+local levels = {"Level 1", "Level 2", "Level 3", "Level 4", "Level 5", "Level 6 (MAX)"}
+local selectedLevel = "Level 1"
+
+for i, lvlName in ipairs(levels) do
+    local lvlBtn = Instance.new("TextButton")
+    lvlBtn.Size = UDim2.new(1, -10, 0, 26)
+    lvlBtn.Position = UDim2.new(0, 5, 0, (i - 1) * 28 + 5)
+    lvlBtn.BackgroundColor3 = Color3.fromRGB(28, 33, 42)
+    lvlBtn.BorderSizePixel = 0
+    lvlBtn.Text = "  " .. lvlName
+    lvlBtn.TextColor3 = Color3.fromRGB(190, 200, 215)
+    lvlBtn.TextSize = 11
+    lvlBtn.Font = Enum.Font.GothamMedium
+    lvlBtn.TextXAlignment = Enum.TextXAlignment.Left
+    lvlBtn.Parent = panicModeHolder
+
+    local lvlCorner = Instance.new("UICorner")
+    lvlCorner.CornerRadius = UDim.new(0, 4)
+    lvlCorner.Parent = lvlBtn
+
+    lvlBtn.MouseButton1Click:Connect(function()
+        selectedLevel = lvlName
+        mostrarNotificacao("PanicMode: " .. lvlName, Color3.fromRGB(80, 140, 255))
+    end)
+end
+
+-- ==========================================
+-- ABA KAITUN
+-- ==========================================
+criarBarraPesquisa(containerKaitun, function(txt) end)
+
+createCategoryLabel("Stats & Farm", 40, containerKaitun)
+
+local function createStatusRow(textName, textVal, posY)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -15, 0, 32)
+    row.Position = UDim2.new(0, 5, 0, posY)
+    row.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+    row.BorderSizePixel = 0
+    row.Parent = containerKaitun
+
+    local rowCorner = Instance.new("UICorner")
+    rowCorner.CornerRadius = UDim.new(0, 6)
+    rowCorner.Parent = row
+
+    local lblName = Instance.new("TextLabel")
+    lblName.Size = UDim2.new(0, 110, 1, 0)
+    lblName.Position = UDim2.new(0, 10, 0, 0)
+    lblName.BackgroundTransparency = 1
+    lblName.Text = textName
+    lblName.TextColor3 = Color3.fromRGB(210, 215, 225)
+    lblName.TextSize = 11
+    lblName.Font = Enum.Font.GothamBold
+    lblName.TextXAlignment = Enum.TextXAlignment.Left
+    lblName.Parent = row
+
+    local lblVal = Instance.new("TextLabel")
+    lblVal.Name = "ValLabel"
+    lblVal.Size = UDim2.new(0, 110, 1, 0)
+    lblVal.Position = UDim2.new(1, -120, 0, 0)
+    lblVal.BackgroundTransparency = 1
+    lblVal.Text = textVal
+    lblVal.TextColor3 = Color3.fromRGB(150, 160, 175)
+    lblVal.TextSize = 11
+    lblVal.Font = Enum.Font.GothamMedium
+    lblVal.TextXAlignment = Enum.TextXAlignment.Right
+    lblVal.Parent = row
+
+    return lblVal
+end
+
+local mainFarmVal = createStatusRow("Main Farm", "Level 1", 60)
+local timeVal = createStatusRow("Tempo Script", "00:00:00", 96)
+
+local function updateLevelStatus()
+    local success, levelValue = pcall(function()
+        return player:WaitForChild("Data"):WaitForChild("Level").Value
+    end)
+    
+    if success then
+        mainFarmVal.Text = "Level " .. tostring(levelValue)
+    else
+        mainFarmVal.Text = "Level 1"
+    end
+end
+
+updateLevelStatus()
+pcall(function()
+    player:WaitForChild("Data"):WaitForChild("Level").Changed:Connect(updateLevelStatus)
+end)
+
+task.spawn(function()
+    local startTime = tick()
+    while true do
+        task.wait(1)
+        local elapsed = math.floor(tick() - startTime)
+        local hours = math.floor(elapsed / 3600)
+        local minutes = math.floor((elapsed % 3600) / 60)
+        local seconds = elapsed % 60
+        timeVal.Text = string.format("%02d:%02d:%02d", hours, minutes, seconds)
+    end
+end)
+
+-- Menu Colapsável Auto Mastery
+local selectedEquipment = nil
+
+local masteryContainer = Instance.new("Frame")
+masteryContainer.Size = UDim2.new(1, -15, 0, 34)
+masteryContainer.Position = UDim2.new(0, 5, 0, 134)
+masteryContainer.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+masteryContainer.BorderSizePixel = 0
+masteryContainer.ClipsDescendants = true
+masteryContainer.Parent = containerKaitun
+
+local masteryCorner = Instance.new("UICorner")
+masteryCorner.CornerRadius = UDim.new(0, 6)
+masteryCorner.Parent = masteryContainer
+
+local masteryHeader = Instance.new("TextButton")
+masteryHeader.Size = UDim2.new(1, 0, 0, 34)
+masteryHeader.BackgroundTransparency = 1
+masteryHeader.Text = ""
+masteryHeader.Parent = masteryContainer
+
+local masteryText = Instance.new("TextLabel")
+masteryText.Size = UDim2.new(1, -30, 1, 0)
+masteryText.Position = UDim2.new(0, 10, 0, 0)
+masteryText.BackgroundTransparency = 1
+masteryText.Text = "Auto mastery"
+masteryText.TextColor3 = Color3.fromRGB(230, 235, 245)
+masteryText.TextSize = 11
+masteryText.Font = Enum.Font.GothamBold
+masteryText.TextXAlignment = Enum.TextXAlignment.Left
+masteryText.Parent = masteryHeader
+
+local arrowLabel = Instance.new("TextLabel")
+arrowLabel.Size = UDim2.new(0, 25, 1, 0)
+arrowLabel.Position = UDim2.new(1, -28, 0, 0)
+arrowLabel.BackgroundTransparency = 1
+arrowLabel.Text = ">"
+arrowLabel.TextColor3 = Color3.fromRGB(150, 160, 175)
+arrowLabel.TextSize = 12
+arrowLabel.Font = Enum.Font.GothamBold
+arrowLabel.Parent = masteryHeader
+
+local optionsHolder = Instance.new("Frame")
+optionsHolder.Size = UDim2.new(1, -16, 0, 120)
+optionsHolder.Position = UDim2.new(0, 8, 0, 36)
+optionsHolder.BackgroundTransparency = 1
+optionsHolder.Parent = masteryContainer
+
+local equipmentList = {"Blox Fruit", "FightStyle", "Gun", "Sword"}
+for i, eqName in ipairs(equipmentList) do
+    local eqBtn = Instance.new("TextButton")
+    eqBtn.Size = UDim2.new(1, 0, 0, 26)
+    eqBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 28)
+    eqBtn.BackgroundColor3 = Color3.fromRGB(28, 33, 42)
+    eqBtn.BorderSizePixel = 0
+    eqBtn.Text = "  " .. eqName
+    eqBtn.TextColor3 = Color3.fromRGB(190, 200, 215)
+    eqBtn.TextSize = 11
+    eqBtn.Font = Enum.Font.GothamMedium
+    eqBtn.TextXAlignment = Enum.TextXAlignment.Left
+    eqBtn.Parent = optionsHolder
+
+    local eqCorner = Instance.new("UICorner")
+    eqCorner.CornerRadius = UDim.new(0, 4)
+    eqCorner.Parent = eqBtn
+
+    eqBtn.MouseButton1Click:Connect(function()
+        selectedEquipment = eqName
+        masteryText.Text = "Auto mastery: " .. eqName
+        
+        TweenService:Create(masteryContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = UDim2.new(1, -15, 0, 34)
+        }):Play()
+        TweenService:Create(arrowLabel, TweenInfo.new(0.3), {Rotation = 0}):Play()
+        isOpenMastery = false
+
+        mostrarNotificacao("Equipamento de Mastery Escolhido!", Color3.fromRGB(80, 220, 100))
+    end)
+end
+
+local isOpenMastery = false
+masteryHeader.MouseButton1Click:Connect(function()
+    isOpenMastery = not isOpenMastery
+    local targetSize = isOpenMastery and UDim2.new(1, -15, 0, 155) or UDim2.new(1, -15, 0, 34)
+    local targetRotation = isOpenMastery and 90 or 0
+
+    TweenService:Create(masteryContainer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Size = targetSize
+    }):Play()
+    TweenService:Create(arrowLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Rotation = targetRotation
+    }):Play()
+end)
+
+-- Botão Auto Mastery
+local masteryBox = Instance.new("Frame")
+masteryBox.Size = UDim2.new(1, -15, 0, 36)
+masteryBox.Position = UDim2.new(0, 5, 0, 173)
+masteryBox.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+masteryBox.BorderSizePixel = 0
+masteryBox.Parent = containerKaitun
+
+local masteryBoxCorner = Instance.new("UICorner")
+masteryBoxCorner.CornerRadius = UDim.new(0, 6)
+masteryBoxCorner.Parent = masteryBox
+
+local masteryBoxText = Instance.new("TextLabel")
+masteryBoxText.Size = UDim2.new(0, 110, 1, 0)
+masteryBoxText.Position = UDim2.new(0, 10, 0, 0)
+masteryBoxText.BackgroundTransparency = 1
+masteryBoxText.Text = "Toggle Mastery"
+masteryBoxText.TextColor3 = Color3.fromRGB(230, 235, 245)
+masteryBoxText.TextSize = 11
+masteryBoxText.Font = Enum.Font.GothamBold
+masteryBoxText.TextXAlignment = Enum.TextXAlignment.Left
+masteryBoxText.Parent = masteryBox
+
+local masteryToggleBg = Instance.new("TextButton")
+masteryToggleBg.Size = UDim2.new(0, 38, 0, 20)
+masteryToggleBg.Position = UDim2.new(1, -45, 0.5, -10)
+masteryToggleBg.BackgroundColor3 = Color3.fromRGB(45, 50, 60)
+masteryToggleBg.BorderSizePixel = 0
+masteryToggleBg.Text = ""
+masteryToggleBg.Parent = masteryBox
+
+local masteryToggleCorner = Instance.new("UICorner")
+masteryToggleCorner.CornerRadius = UDim.new(1, 0)
+masteryToggleCorner.Parent = masteryToggleBg
+
+local masteryToggleCircle = Instance.new("Frame")
+masteryToggleCircle.Size = UDim2.new(0, 14, 0, 14)
+masteryToggleCircle.Position = UDim2.new(0, 3, 0.5, -7)
+masteryToggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+masteryToggleCircle.BorderSizePixel = 0
+masteryToggleCircle.Parent = masteryToggleBg
+
+local masteryCircleCorner = Instance.new("UICorner")
+masteryCircleCorner.CornerRadius = UDim.new(1, 0)
+masteryCircleCorner.Parent = masteryToggleCircle
+
+local masteryAtivo = false
+
+masteryToggleBg.MouseButton1Click:Connect(function()
+    if not selectedEquipment and not masteryAtivo then
+        mostrarNotificacao("Escolha um equipamento primeiro!", Color3.fromRGB(240, 80, 80))
+        return
+    end
+
+    masteryAtivo = not masteryAtivo
+
+    if masteryAtivo then
+        TweenService:Create(masteryToggleBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 140, 75)}):Play()
+        TweenService:Create(masteryToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -17, 0.5, -7)}):Play()
+        mostrarNotificacao("Auto Mastery Iniciado!", Color3.fromRGB(80, 140, 255))
+
+        task.spawn(function()
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/betsejogos-commits/Blue-X-Teddy/refs/heads/main/Combat.lua"))()
+            end)
+        end)
+
+        task.spawn(function()
+            while masteryAtivo do
+                task.wait(1)
+                pcall(function()
+                    local char = player.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                            if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                                local distance = (char.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                                local speed = 300
+                                local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+                                local tween = TweenService:Create(char.HumanoidRootPart, tweenInfo, {CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 3, 3)})
+                                tween:Play()
+                                task.wait(distance / speed)
+                                break
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    else
+        TweenService:Create(masteryToggleBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 50, 60)}):Play()
+        TweenService:Create(masteryToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -7)}):Play()
+        mostrarNotificacao("Auto Mastery Desativado!", Color3.fromRGB(240, 160, 60))
+    end
+end)
+
+-- Botão Auto Kaitun
+local autoBox = Instance.new("Frame")
+autoBox.Size = UDim2.new(1, -15, 0, 36)
+autoBox.Position = UDim2.new(0, 5, 0, 212)
+autoBox.BackgroundColor3 = Color3.fromRGB(22, 25, 32)
+autoBox.BorderSizePixel = 0
+autoBox.Parent = containerKaitun
+
+local autoCorner = Instance.new("UICorner")
+autoCorner.CornerRadius = UDim.new(0, 6)
+autoCorner.Parent = autoBox
+
+local autoText = Instance.new("TextLabel")
+autoText.Size = UDim2.new(0, 110, 1, 0)
+autoText.Position = UDim2.new(0, 10, 0, 0)
+autoText.BackgroundTransparency = 1
+autoText.Text = "Auto Kaitun"
+autoText.TextColor3 = Color3.fromRGB(230, 235, 245)
+autoText.TextSize = 11
+autoText.Font = Enum.Font.GothamBold
+autoText.TextXAlignment = Enum.TextXAlignment.Left
+autoText.Parent = autoBox
+
+local toggleBg = Instance.new("TextButton")
+toggleBg.Size = UDim2.new(0, 38, 0, 20)
+toggleBg.Position = UDim2.new(1, -45, 0.5, -10)
+toggleBg.BackgroundColor3 = Color3.fromRGB(45, 50, 60)
+toggleBg.BorderSizePixel = 0
+toggleBg.Text = ""
+toggleBg.Parent = autoBox
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(1, 0)
+toggleCorner.Parent = toggleBg
+
+local toggleCircle = Instance.new("Frame")
+toggleCircle.Size = UDim2.new(0, 14, 0, 14)
+toggleCircle.Position = UDim2.new(0, 3, 0.5, -7)
+toggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleCircle.BorderSizePixel = 0
+toggleCircle.Parent = toggleBg
+
+local circleCorner = Instance.new("UICorner")
+circleCorner.CornerRadius = UDim.new(1, 0)
+circleCorner.Parent = toggleCircle
+
+-- Alternar entre Abas
+tabKaitun.MouseButton1Click:Connect(function()
+    containerKaitun.Visible = true
+    containerConfigs.Visible = false
+    activeIndicator.Position = UDim2.new(0, 0, 0.5, -9)
+    activeIndicator.Parent = tabKaitun
+end)
+
+tabConfigs.MouseButton1Click:Connect(function()
+    containerKaitun.Visible = false
+    containerConfigs.Visible = true
+    activeIndicator.Position = UDim2.new(0, 0, 0.5, -9)
+    activeIndicator.Parent = tabConfigs
+end)
+
+-- ==========================================
+-- BOLINHA FLUTUANTE ARRASTÁVEL
+-- ==========================================
+local floatingButton = Instance.new("ImageButton")
+floatingButton.Name = "FloatingButton"
+floatingButton.Size = UDim2.new(0, 42, 0, 42)
+floatingButton.Position = UDim2.new(0, 20, 0.5, -21)
+floatingButton.BackgroundColor3 = Color3.fromRGB(18, 20, 24)
+floatingButton.Image = "rbxassetid://108943506873032"
+floatingButton.Visible = false
+floatingButton.Parent = screenGui
+
+local floatCorner = Instance.new("UICorner")
+floatCorner.CornerRadius = UDim.new(1, 0)
+floatCorner.Parent = floatingButton
+
+local floatStroke = Instance.new("UIStroke")
+floatStroke.Color = Color3.fromRGB(50, 60, 80)
+floatStroke.Thickness = 2
+floatStroke.Parent = floatingButton
+
+-- ==========================================
+-- SISTEMA DE ARRASTO E ANIMAÇÕES
+-- ==========================================
+local function makeDraggable(topbarObj, frameObj)
+    local dragging = false
+    local dragInput, dragStart, startPos
+    
+    topbarObj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frameObj.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    topbarObj.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frameObj.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+makeDraggable(topBar, mainFrame)
+
+local draggingFloat = false
+local dragInputFloat, dragStartFloat, startPosFloat
+
+floatingButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        draggingFloat = true
+        dragStartFloat = input.Position
+        startPosFloat = floatingButton.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                draggingFloat = false
+            end
+        end)
+    end
+end)
+
+floatingButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInputFloat = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInputFloat and draggingFloat then
+        local delta = input.Position - dragStartFloat
+        floatingButton.Position = UDim2.new(
+            startPosFloat.X.Scale,
+            startPosFloat.X.Offset + delta.X,
+            startPosFloat.Y.Scale,
+            startPosFloat.Y.Offset + delta.Y
+        )
+    end
+end)
+
+local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
+local function abrirMenu()
+    floatingButton.Visible = false
+    mainFrame.Visible = true
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.BackgroundTransparency = 1
+    
+    TweenService:Create(mainFrame, tweenInfo, {
+        Size = UDim2.new(0, 460, 0, 330),
+        BackgroundTransparency = 0
+    }):Play()
+end
+
+local function fecharMenu()
+    local tween = TweenService:Create(mainFrame, tweenInfo, {
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        mainFrame.Visible = false
+        floatingButton.Visible = true
+    end)
+end
+
+closeButton.MouseButton1Click:Connect(fecharMenu)
+minimizeButton.MouseButton1Click:Connect(fecharMenu)
+floatingButton.MouseButton1Click:Connect(abrirMenu)
+
+-- ==========================================
+-- LÓGICA DO AUTO KAITUN
+-- ==========================================
+local autoAtivo = false
+
+toggleBg.MouseButton1Click:Connect(function()
+    autoAtivo = not autoAtivo
+    
+    if autoAtivo then
+        TweenService:Create(toggleBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 140, 75)}):Play()
+        TweenService:Create(toggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -17, 0.5, -7)}):Play()
+        subTitleLabel.Text = "Auto Kaitun Ativo"
+        subTitleLabel.TextColor3 = Color3.fromRGB(80, 220, 100)
+        
+        mostrarNotificacao("Auto Kaitun Iniciado!", Color3.fromRGB(80, 140, 255))
+        
+        task.spawn(function()
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/betsejogos-commits/Kaitun-Blox-Fruits/refs/heads/main/AntiAFKV1"))()
+            end)
+        end)
+
+        task.spawn(function()
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/betsejogos-commits/Kaitun-Blox-Fruits/refs/heads/main/BringMobService"))()
+            end)
+        end)
+
+        task.spawn(function()
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/betsejogos-commits/Kaitun-Blox-Fruits/refs/heads/main/Kaitun"))()
+            end)
+        end)
+    else
+        TweenService:Create(toggleBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 50, 60)}):Play()
+        TweenService:Create(toggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -7)}):Play()
+        subTitleLabel.Text = "Blox Fruits"
+        subTitleLabel.TextColor3 = Color3.fromRGB(130, 140, 155)
+        
+        mostrarNotificacao("Auto Kaitun Desativado!", Color3.fromRGB(240, 160, 60))
+    end
+end)
